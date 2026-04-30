@@ -3,7 +3,8 @@ session_start();
 require_once 'dbconnect.php';
 
 if (isset($_SESSION['role'])) {
-    header("Location: " . $_SESSION['role'] . "_dashboard.php");
+    $role = $_SESSION['role'];
+    header("Location: pages/$role/{$role}_dashboard.php");
     exit();
 }
 ?>
