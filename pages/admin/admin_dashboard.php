@@ -38,7 +38,7 @@ $total_organisers = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM organiser
         <a href="manage_users.php">Manage User</a>
         <a href="manage_organisers.php">Manage Organizers</a>
         <a href="manage_events.php">Manage Events</a>
-        <a href="logout.php" class="logout">Logout</a>
+        <a href="../../logout.php">Logout</a>
     </div>
 
     <div class="main-content">
