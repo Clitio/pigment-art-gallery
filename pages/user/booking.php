@@ -14,19 +14,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
     $stmt->bind_param("ii", $event_ID, $user_ID);
 
     if ($stmt->execute()) {
-        $message = "Ingresso reservado com sucesso!";
+        $message = "Ticket booked successfully!";
     } else {
         if ($conn->errno == 1062) {
             $message = "You already have this event booked.";
         } else {
-            $message = "Error to process your booking.";
+            $message = "Error processing your booking.";
         }
     }
 }
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         <meta charset="UTF-8">
         <title>Booking</title>
@@ -41,7 +41,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
             $sql = "SELECT event_ID, e_Title FROM event";
             $result = $conn->query($sql);
             while($row = $result->fetch_assoc()){
-                echo "<option value='{$row['event_ID']}'>{$row['e_title']}</options>";
+                echo "<option value='{$row['event_ID']}'>{$row['e_Title']}</option>";
             }
             ?>
             </select>

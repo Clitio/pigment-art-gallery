@@ -9,9 +9,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (str_ends_with($email, '@pigment.com')) {
         $sql = "SELECT admin_ID as id, a_pwd as pwd, 'admin' as role FROM admin WHERE a_email = '$email'";
     } else {
-        $sql = "SELECT user_id as id, pwd, 'user' as role FROM user WHERE email = '$email' 
+        $sql = "SELECT user_ID as id, pwd, 'user' as role FROM user WHERE email = '$email' 
                 UNION 
-                SELECT organiser_id as id, o_pwd as pwd, 'organiser' as role FROM organiser WHERE o_email = '$email'";
+                SELECT organiser_ID as id, o_pwd as pwd, 'organiser' as role FROM organiser WHERE o_email = '$email'";
     }
 
     $result = mysqli_query($conn, $sql);
@@ -20,9 +20,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $row = mysqli_fetch_assoc($result);
         
         if (password_verify($password, $row['pwd'])) {
-            $_SESSION['user_id'] = $row['id'];
             $_SESSION['role'] = $row['role'];
             $_SESSION['email'] = $email;
+
+            if ($row['role'] === 'user') {
+                $_SESSION['user_ID'] = $row['id'];
+            } elseif ($row['role'] === 'organiser') {
+                $_SESSION['organiser_ID'] = $row['id'];
+            } elseif ($row['role'] === 'admin') {
+                $_SESSION['admin_ID'] = $row['id'];
+            }
 
             header("Location: index.php");
             exit();
