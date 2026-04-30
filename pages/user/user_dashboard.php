@@ -3,8 +3,8 @@ session_start();
 require_once 'dbconnect.php'; 
 
 
-if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'user') {
-    header("Location: login.php");
+if (!isset($_SESSION['user_ID']) || !isset($_SESSION['role']) || $_SESSION['role'] !== 'user') {
+    header("Location: ../../login.php");
     exit();
 }
 
@@ -15,13 +15,13 @@ $sql_user = "SELECT f_Name, l_Name, email FROM user WHERE user_ID = ?";
 $stmt_user = $conn->prepare($sql_user);
 $stmt_user->bind_param("i", $user_ID);
 $stmt_user->execute();
-$user_data = $stmt_user->get_result();
+$user_query_user = $stmt_user->get_result();
 
-if ($result_user->num_rows === 0) {
+if ($user_query_user->num_rows === 0) {
     die("Error: User not found on database.");
 }
 
-$user_data = $result_user->fetch_assoc();
+$user_data = $user_query_user->fetch_assoc();
 
 $sql_bookings = "SELECT e.e_Title, e.e_Date, e.e_Location 
                  FROM tickets t
