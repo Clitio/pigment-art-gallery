@@ -2,7 +2,7 @@
 require_once 'dbconnect.php';
 
 $success = "";
-$error = "";
+$errors  = [];
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $title        = trim($_POST["e_Title"]);
@@ -13,26 +13,78 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $description  = trim($_POST["e_Description"]);
     $organiser_ID = 1; // temporary until login is built
 
-    $imagePath = "";
-    if (isset($_FILES["e_Image"]) && $_FILES["e_Image"]["error"] == 0) {
-        $uploadDir = "../../uploads/";
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0755, true);
-        }
-        $filename   = time() . "_" . basename($_FILES["e_Image"]["name"]);
-        $targetPath = $uploadDir . $filename;
+    // Title
+    if (strlen($title) == 0) {
+        $errors[] = "Title is required.";
+    } elseif (strlen($title) > 255) {
+        $errors[] = "Title cannot exceed 255 characters.";
+    }
 
-        $allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
-        if (!in_array($_FILES["e_Image"]["type"], $allowedTypes)) {
-            $error = "Only JPG, PNG, GIF, and WEBP images are allowed.";
-        } elseif (!move_uploaded_file($_FILES["e_Image"]["tmp_name"], $targetPath)) {
-            $error = "Failed to upload image.";
-        } else {
-            $imagePath = "uploads/" . $filename;
+    // Location
+    if ($location === "") {
+        $location = null;
+    } elseif (strlen($location) > 255) {
+        $errors[] = "Location cannot exceed 255 characters.";
+    }
+
+    // Date — only validate if provided
+    if ($date !== "") {
+        $parsedDate = DateTime::createFromFormat('Y-m-d', $date);
+        if (!$parsedDate || $parsedDate->format('Y-m-d') !== $date) {
+            $errors[] = "Invalid date format.";
         }
     }
 
-    if ($error == "") {
+    // Time — only validate if provided
+    if ($time !== "") {
+        $parsedTime = DateTime::createFromFormat('H:i', $time);
+        if (!$parsedTime || $parsedTime->format('H:i') !== $time) {
+            $errors[] = "Invalid time format.";
+        }
+    }
+
+    // Price — only validate if provided
+    if ($price !== "") {
+        if (!is_numeric($price) || (float)$price < 0) {
+            $errors[] = "Price must be a positive number.";
+        }
+    }
+
+    // Description
+    if (strlen($description) > 1000) {
+        $errors[] = "Description cannot exceed 1000 characters.";
+    }
+
+    // Image
+    $imagePath = "";
+    if (isset($_FILES["e_Image"]) && $_FILES["e_Image"]["error"] == 0) {
+        if ($_FILES["e_Image"]["size"] > 5 * 1024 * 1024) {
+            $errors[] = "Image must be 5 MB or smaller.";
+        } else {
+            $finfo      = new finfo(FILEINFO_MIME_TYPE);
+            $actualMime = $finfo->file($_FILES["e_Image"]["tmp_name"]);
+
+            $allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+            if (!in_array($actualMime, $allowedTypes)) {
+                $errors[] = "Only JPG, PNG, GIF, and WEBP images are allowed.";
+            } else {
+                $uploadDir = "../../uploads/";
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0755, true);
+                }
+                $filename   = time() . "_" . basename($_FILES["e_Image"]["name"]);
+                $targetPath = $uploadDir . $filename;
+
+                if (!move_uploaded_file($_FILES["e_Image"]["tmp_name"], $targetPath)) {
+                    $errors[] = "Failed to upload image.";
+                } else {
+                    $imagePath = "uploads/" . $filename;
+                }
+            }
+        }
+    }
+
+    if (empty($errors)) {
         $stmt = mysqli_prepare($conn,
             "INSERT INTO event (e_Title, e_Location, e_Date, e_Time, e_Price, e_Description, e_Image, organiser_ID)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
@@ -44,7 +96,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if (mysqli_stmt_execute($stmt)) {
             $success = "Event created successfully!";
         } else {
-            $error = "Database error: " . mysqli_error($conn);
+            $errors[] = "Database error: " . mysqli_error($conn);
         }
         mysqli_stmt_close($stmt);
     }
@@ -61,11 +113,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     <h2>Create New Event</h2>
 
+    <nav>
+        <a href="org-dashboard.php">Dashboard</a> |
+        <a href="org-update.php">My Events</a> |
+        <a href="org-add.php">Add Event</a>
+    </nav>
+
     <?php if ($success): ?>
         <p style="color: green;"><?= $success ?></p>
     <?php endif; ?>
-    <?php if ($error): ?>
-        <p style="color: red;"><?= $error ?></p>
+    <?php if (!empty($errors)): ?>
+        <ul style="color: red;">
+            <?php foreach ($errors as $e): ?>
+                <li><?= htmlspecialchars($e) ?></li>
+            <?php endforeach; ?>
+        </ul>
     <?php endif; ?>
 
     <form method="POST" enctype="multipart/form-data">
