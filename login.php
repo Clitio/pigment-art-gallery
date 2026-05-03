@@ -3,23 +3,26 @@ session_start();
 require_once 'dbconnect.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $email = mysqli_real_escape_string($conn, $_POST['email']);
+    $email = $_POST['email'];
     $password = $_POST['password'];
 
     if (str_ends_with($email, '@pigment.com')) {
-        $sql = "SELECT admin_ID as id, a_pwd as pwd, 'admin' as role FROM admin WHERE a_email = '$email'";
+        $stmt = $conn->prepare("SELECT admin_ID as id, a_pwd as pwd, 'admin' as role FROM admin WHERE a_email = ?");
+        $stmt->bind_param("s", $email);
     } else {
-        $sql = "SELECT user_id as id, pwd, 'user' as role FROM user WHERE email = '$email' 
-                UNION 
-                SELECT organiser_id as id, o_pwd as pwd, 'organiser' as role FROM organiser WHERE o_email = '$email'";
+        $stmt = $conn->prepare("SELECT user_id as id, pwd, 'user' as role FROM user WHERE email = ? 
+                                UNION 
+                                SELECT organiser_id as id, o_pwd as pwd, 'organiser' as role FROM organiser WHERE o_email = ?");
+        $stmt->bind_param("ss", $email, $email);
     }
 
-    $result = mysqli_query($conn, $sql);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-    if ($result && mysqli_num_rows($result) > 0) {
-        $row = mysqli_fetch_assoc($result);
-        
+    if ($row = $result->fetch_assoc()) {
         if (password_verify($password, $row['pwd'])) {
+            session_regenerate_id(true); 
+
             $_SESSION['user_id'] = $row['id'];
             $_SESSION['role'] = $row['role'];
             $_SESSION['email'] = $email;
@@ -27,7 +30,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             header("Location: index.php");
             exit();
         } else {
-            $error = "Incorret Password.";
+            $error = "Password Incorrect.";
         }
     } else {
         $error = "User not found.";
@@ -36,29 +39,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 ?>
 
 <!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <title>Pigment - Login</title>
-</head>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Pigment - Login</title></head>
 <body>
     <h1>Login</h1>
-
-    <?php if(isset($error)) echo "<p style='color:red;'>$error</p>"; ?>
-
+    <?php if(isset($error)) echo "<p style='color:red;'>" . htmlspecialchars($error) . "</p>"; ?>
     <form action="login.php" method="POST">
-        <label>E-mail:</label><br>
-        <input type="email" name="email" required>
-        <br><br>
-
-        <label>Senha:</label><br>
-        <input type="password" name="password" required>
-        <br><br>
-
+        <input type="email" name="email" placeholder="E-mail" required><br><br>
+        <input type="password" name="password" placeholder="Password" required><br><br>
         <button type="submit">Enter</button>
     </form>
-
-    <p>Not own an account? <a href="register.php">Register here</a></p>
-    <p><a href="index.php">Back to homepage</a></p>
 </body>
 </html>

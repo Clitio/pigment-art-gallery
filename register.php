@@ -1,53 +1,65 @@
- <?php
+<?php
 require_once 'dbconnect.php';
 
+$error_msg = "";
+$success_msg = "";
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $role = $_POST['role'];
-    $email = mysqli_real_escape_string($conn, $_POST['email']);
-    $full_name = mysqli_real_escape_string($conn, $_POST['full_name']);
-    $dob = mysqli_real_escape_string($conn, $_POST['dob']);
-    $password = password_hash($_POST['password'], PASSWORD_DEFAULT); // Criptografia
-    $company = mysqli_real_escape_string($conn, $_POST['company']);
+    $role = $_POST['role'] ?? '';
+    $email = $_POST['email'] ?? '';
+    $full_name = $_POST['full_name'] ?? '';
+    $dob = $_POST['dob'] ?? '';
+    $company = $_POST['company'] ?? '';
+    $password_plain = $_POST['password'] ?? '';
 
-    $sql_check = "SELECT email FROM user WHERE email = '$email' 
-                  UNION SELECT o_email FROM organiser WHERE o_email = '$email'
-                  UNION SELECT a_email FROM admin WHERE a_email = '$email'";
-    $res_check = mysqli_query($conn, $sql_check);
-
-    if (mysqli_num_rows($res_check) > 0) {
-        die("Error: e-mail already exist");
-    }
-
-    if ($role === 'admin') {
-        if (!str_ends_with($email, '@pigment.com')) {
-            die("Error: admin e-mail not authorized <br><br><a href='register.php'>Return to register page</a>" );
-        }
-        $query = "INSERT INTO admin (a_email, a_pwd) VALUES ('$email', '$password')";
+    if (strlen($password_plain) < 8 || !preg_match("/[a-z]/i", $password_plain) || !preg_match("/[0-9]/", $password_plain)) {
+        $error_msg = "Password must contain at least 8 characteres, including letters and numbers.";
     } 
-    
-    else if ($role === 'organiser') {
-        if (empty(trim($company))) {
-        die("Error: Please provide your company name. <br><br><a href='register.php'>Return to register page</a>");
-    }
-        $query = "INSERT INTO organiser (o_Name, o_Company, o_email, o_pwd) 
-                  VALUES ('$full_name', '$company', '$email', '$password')";
-    } 
-    
-    else { 
-        $name_parts = explode(" ", $full_name);
-        $f_name = $name_parts[0];
-        $l_name = isset($name_parts[1]) ? $name_parts[1] : "";
+    else {
+        $sql_check = "SELECT email FROM user WHERE email = ? 
+                      UNION SELECT o_email FROM organiser WHERE o_email = ? 
+                      UNION SELECT a_email FROM admin WHERE a_email = ?";
+        $stmt_check = $conn->prepare($sql_check);
+        $stmt_check->bind_param("sss", $email, $email, $email);
+        $stmt_check->execute();
         
-        $query = "INSERT INTO user (f_Name, l_Name, dOb, email, pwd) 
-                  VALUES ('$f_name', '$l_name', '$dob', '$email', '$password')";
-    }
+        if ($stmt_check->get_result()->num_rows > 0) {
+            $error_msg = "E-mail unavailable.";
+        } else {
+            $password_hash = password_hash($password_plain, PASSWORD_DEFAULT);
 
-    if (mysqli_query($conn, $query)) {
-        echo "<h1>Success!</h1>";
-        echo "<p>Account created <strong>$role</strong>.</p>";
-        echo "<a href='login.php'>Click here to login</a>";
-    } else {
-        echo "Error registering to the DB " . mysqli_error($conn);
+            if ($role === 'admin') {
+                if (!str_ends_with($email, '@pigment.com')) {
+                    $error_msg = "Admin Account not authorized.";
+                } else {
+                    $stmt = $conn->prepare("INSERT INTO admin (a_email, a_pwd) VALUES (?, ?)");
+                    $stmt->bind_param("ss", $email, $password_hash);
+                }
+            } 
+            elseif ($role === 'organiser') {
+                if (empty(trim($company))) {
+                    $error_msg = "Company's name is a must for Organisers.";
+                } else {
+                    $stmt = $conn->prepare("INSERT INTO organiser (o_Name, o_Company, o_email, o_pwd) VALUES (?, ?, ?, ?)");
+                    $stmt->bind_param("ssss", $full_name, $company, $email, $password_hash);
+                }
+            } 
+            else { 
+                $name_parts = explode(" ", $full_name);
+                $f_name = $name_parts[0];
+                $l_name = $name_parts[1] ?? "";
+                $stmt = $conn->prepare("INSERT INTO user (f_Name, l_Name, dOb, email, pwd) VALUES (?, ?, ?, ?, ?)");
+                $stmt->bind_param("sssss", $f_name, $l_name, $dob, $email, $password_hash);
+            }
+
+            if (empty($error_msg)) {
+                if ($stmt->execute()) {
+                    $success_msg = "Account created successfuly!";
+                } else {
+                    $error_msg = "ERROR: " . $stmt->error;
+                }
+            }
+        }
     }
 }
 ?>
@@ -56,39 +68,52 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Pigment</title>
+    <title>Pigment - Registration</title>
+    <style>
+        .alert { padding: 15px; margin-bottom: 20px; border: 1px solid transparent; border-radius: 4px; }
+        .alert-danger { color: #a94442; background-color: #f2dede; border-color: #ebccd1; }
+        .alert-success { color: #3c763d; background-color: #dff0d8; border-color: #d6e9c6; }
+    </style>
 </head>
 <body>
     <h1>Registration</h1>
+
+    <?php if (!empty($error_msg)): ?>
+        <div class="alert alert-danger"><strong>Error:</strong> <?php echo htmlspecialchars($error_msg); ?></div>
+    <?php endif; ?>
+
+    <?php if (!empty($success_msg)): ?>
+        <div class="alert alert-success"><?php echo $success_msg; ?></div>
+    <?php endif; ?>
     
     <form action="register.php" method="POST">
         <label>Account Type:</label><br>
         <select name="role" required>
-            <option value="" disabled selected>Choose an option: </option>
-            <option value="user">User</option>
-            <option value="organiser">Organiser</option>
-            <option value="admin">Admin</option>
+            <option value="user" <?php if(isset($_POST['role']) && $_POST['role'] == 'user') echo 'selected'; ?>>User</option>
+            <option value="organiser" <?php if(isset($_POST['role']) && $_POST['role'] == 'organiser') echo 'selected'; ?>>Organiser</option>
+            <option value="admin" <?php if(isset($_POST['role']) && $_POST['role'] == 'admin') echo 'selected'; ?>>Admin</option>
         </select>
         <br><br>
 
         <label>Full Name:</label><br>
-        <input type="text" name="full_name" required>
+        <input type="text" name="full_name" value="<?php echo htmlspecialchars($_POST['full_name'] ?? ''); ?>" required>
         <br><br>
 
         <label>Date of Birth:</label><br>
-        <input type="date" name="dob">
+        <input type="date" name="dob" value="<?php echo htmlspecialchars($_POST['dob'] ?? ''); ?>">
         <br><br>
 
         <label>E-mail:</label><br>
-        <input type="email" name="email" placeholder="ex: nome@pigment.com para admin" required>
+        <input type="email" name="email" value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>" placeholder="ex: nome@pigment.com para admin" required>
         <br><br>
 
         <label>Password:</label><br>
         <input type="password" name="password" required>
+        <small>(Minimum 8 characters, letters and numbers)</small>
         <br><br>
 
         <label>Company (Only for organiser):</label><br>
-        <input type="text" name="company">
+        <input type="text" name="company" value="<?php echo htmlspecialchars($_POST['company'] ?? ''); ?>">
         <br><br>
 
         <button type="submit">Register</button>
