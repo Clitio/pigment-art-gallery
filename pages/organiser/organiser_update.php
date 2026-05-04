@@ -146,9 +146,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     <nav>
         <a href="organiser_dashboard.php">Dashboard</a> |
-        <a href="organiser_update.php">Edit Events</a> |
         <a href="organiser_add.php">Add Event</a>   |
         <a href="organiser_list.php">My Events</a>  |
+        <a href="../../logout.php">Logout</a>
     </nav>
 
     <?php if ($success): ?>

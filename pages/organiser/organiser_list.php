@@ -31,9 +31,9 @@ require_once 'dbconnect.php';
 
     <nav>
         <a href="organiser_dashboard.php">Dashboard</a> |
-        <a href="organiser_update.php">Edit Events</a> |
         <a href="organiser_add.php">Add Event</a> |
         <a href="organiser_list.php">My Events</a> |
+        <a href="../../logout.php">Logout</a>
     </nav>
 
     <form method ="POST" action="organiser_list.php">
@@ -68,10 +68,7 @@ require_once 'dbconnect.php';
                         <td><?php echo htmlspecialchars($row['e_Description']); ?></td>
                         <td>
                             <a href ="organiser_update.php?event_ID=<?php echo htmlspecialchars($row['event_ID']); ?>">Edit</a>
-                            <form method="POST" action="organiser_delete.php" onsubmit="return confirm('Are you sure you want to delete this event?');" style ="display:inline;">
-                                <input type="hidden" name="event_ID" value="<?php echo htmlspecialchars($row['event_ID']); ?>">
-                                <button type="submit">Delete</button>
-                            </form>
+                
                         </td>
                     </tr>
                 <?php endwhile; ?>

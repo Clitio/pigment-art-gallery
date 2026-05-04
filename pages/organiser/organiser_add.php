@@ -59,7 +59,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $errors[] = "Description cannot exceed 1000 characters.";
     }
 
-    // Image
+    // Image Validation: Check if an image file is uploaded, ensure it is a valid image type, and move it to the uploads directory.
+    // approach suggested by Claude, but modified to fit our database structure and requirements.
     $imagePath = "";
     if (isset($_FILES["e_Image"]) && $_FILES["e_Image"]["error"] == 0) {
         if ($_FILES["e_Image"]["size"] > 5 * 1024 * 1024) {
@@ -119,9 +120,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     <nav>
         <a href="organiser_dashboard.php">Dashboard</a> |
-        <a href="organiser_update.php">Edit Events</a> |
         <a href="organiser_add.php">Add Event</a>   |
-        <a href="organiser_list.php">My Events</a>  |
+        <a href="organiser_list.php">My Events</a>  
     </nav>
 
     <?php if ($success): ?>
