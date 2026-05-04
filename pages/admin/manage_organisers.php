@@ -25,7 +25,7 @@ $result = mysqli_query($conn, $query);
 </head>
 <body>
     <h2>Organisers</h2>
-    <p><a href="admin_dashboard.php">Return to Panel</a></p>
+    <p><a href="admin_dashboard.php">Return</a></p>
 
     <table border="1" cellpadding="10">
         <thead>

@@ -5,6 +5,7 @@ $error_msg = "";
 $success_msg = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    //collect form data using null coalescing operator to avoid "undefined index" errors
     $role = $_POST['role'] ?? '';
     $email = $_POST['email'] ?? '';
     $full_name = $_POST['full_name'] ?? '';
@@ -12,10 +13,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $company = $_POST['company'] ?? '';
     $password_plain = $_POST['password'] ?? '';
 
+    //password Validation: 8+ chars, letters, and numbers
     if (strlen($password_plain) < 8 || !preg_match("/[a-z]/i", $password_plain) || !preg_match("/[0-9]/", $password_plain)) {
         $error_msg = "Password must contain at least 8 characteres, including letters and numbers.";
     } 
     else {
+        //check if email already exists in ANY of the three tables
         $sql_check = "SELECT email FROM user WHERE email = ? 
                       UNION SELECT o_email FROM organiser WHERE o_email = ? 
                       UNION SELECT a_email FROM admin WHERE a_email = ?";
@@ -26,8 +29,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($stmt_check->get_result()->num_rows > 0) {
             $error_msg = "E-mail unavailable.";
         } else {
+            //securely hash the password before saving
             $password_hash = password_hash($password_plain, PASSWORD_DEFAULT);
 
+            //logic for ADMIN registration
             if ($role === 'admin') {
                 if (!str_ends_with($email, '@pigment.com')) {
                     $error_msg = "Admin Account not authorized.";
@@ -36,6 +41,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $stmt->bind_param("ss", $email, $password_hash);
                 }
             } 
+
+            //logic for ORGANISER registration
             elseif ($role === 'organiser') {
                 if (empty(trim($company))) {
                     $error_msg = "Company's name is a must for Organisers.";
@@ -44,14 +51,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $stmt->bind_param("ssss", $full_name, $company, $email, $password_hash);
                 }
             } 
+            //logic for standard USER registration
             else { 
-                $name_parts = explode(" ", $full_name);
+                $name_parts = explode(" ", $full_name); //split full name into first and last
                 $f_name = $name_parts[0];
                 $l_name = $name_parts[1] ?? "";
                 $stmt = $conn->prepare("INSERT INTO user (f_Name, l_Name, dOb, email, pwd) VALUES (?, ?, ?, ?, ?)");
                 $stmt->bind_param("sssss", $f_name, $l_name, $dob, $email, $password_hash);
             }
 
+            //execute the insertion if no errors occurred during validation
             if (empty($error_msg)) {
                 if ($stmt->execute()) {
                     $success_msg = "Account created successfuly!";
