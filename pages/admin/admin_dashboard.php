@@ -32,7 +32,7 @@ $total_organisers = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM organiser
 
     <div class="sidebar">
         <h2>Pigment Admin</h2>
-        <p>Olá, <?php echo $_SESSION['email']; ?></p>
+        <p>Hello, <?php echo $_SESSION['email']; ?></p>
         <hr>
         <a href="admin_dashboard.php">Dashboard</a>
         <a href="manage_users.php">Manage User</a>
