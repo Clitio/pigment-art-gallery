@@ -16,14 +16,15 @@ require_once 'dbconnect.php';
     mysqli_stmt_execute($stmt);
     mysqli_stmt_bind_result($stmt, $o_Name, $o_Company);
     mysqli_stmt_fetch($stmt);
+    mysqli_stmt_close($stmt);
 
     $stmt2 = mysqli_prepare($conn, 'SELECT COUNT(*)  AS total_events FROM event WHERE organiser_ID = ?');
     mysqli_stmt_bind_param($stmt2, 'i', $organiser_ID);
     mysqli_stmt_execute($stmt2);
     mysqli_stmt_bind_result($stmt2, $total_events);
     mysqli_stmt_fetch($stmt2);
-    mysqli_stmt_close($stmt);
     mysqli_stmt_close($stmt2);
+
 
 
 
