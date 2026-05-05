@@ -37,33 +37,77 @@ $bookings = $stmt_bookings->get_result();
     <meta charset="UTF-8">
     <title>My Panel - Pigment Art Gallery</title>
     <style>
-        .card { border: 1px solid #ccc; padding: 15px; margin-bottom: 10px; border-radius: 8px; }
-        .welcome { background-color: #f4f4f4; padding: 20px; border-radius: 8px; }
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 40px 20px;
+            font-family: sans-serif;
+            box-sizing: border-box;
+        }
+        .page {
+            width: 760px;
+            max-width: 100%;
+        }
+        .welcome {
+            padding: 30px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .nav-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 18px;
+        }
+        .card-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .card {
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+        }
+        h2 { margin-top: 35px; text-align: center; }
     </style>
 </head>
 <body>
 
-    <div class="welcome">
-        <h1>Hello, <?php echo htmlspecialchars($user_data['f_Name']); ?>!</h1>
-        <p>Email: <?php echo htmlspecialchars($user_data['email']); ?></p>
-        <a href="../../logout.php">Logout</a> |
-        <a href="booking.php">Book new events</a> |
-        <a href="user-update.php">Update profile</a>
-    </div>
-
-    <h2>My bookings</h2>
-
-    <?php if ($bookings->num_rows > 0): ?>
-        <?php while ($ticket = $bookings->fetch_assoc()): ?>
-            <div class="card">
-                <h3><?php echo htmlspecialchars($ticket['e_Title']); ?></h3>
-                <p><strong>Date:</strong> <?php echo date('d/m/Y', strtotime($ticket['e_Date'])); ?></p>
-                <p><strong>Location:</strong> <?php echo htmlspecialchars($ticket['e_Location']); ?></p>
+    <div class="page">
+        <div class="welcome">
+            <h1>Hello, <?php echo htmlspecialchars($user_data['f_Name']); ?>!</h1>
+            <p>Email: <?php echo htmlspecialchars($user_data['email']); ?></p>
+            <div class="nav-links">
+                <a href="../../logout.php">Logout</a>
+                <a href="booking.php">Book new events</a>
+                <a href="user-update.php">Update profile</a>
             </div>
-        <?php endwhile; ?>
-    <?php else: ?>
-        <p>You didn't book any event <a href="booking.php">Click here to see your gallery.</a></p>
-    <?php endif; ?>
+        </div>
+
+        <h2>My bookings</h2>
+
+        <div class="card-container">
+            <?php if ($bookings->num_rows > 0): ?>
+                <?php while ($ticket = $bookings->fetch_assoc()): ?>
+                    <div class="card">
+                        <h3><?php echo htmlspecialchars($ticket['e_Title']); ?></h3>
+                        <p><strong>Date:</strong> <?php echo date('d/m/Y', strtotime($ticket['e_Date'])); ?></p>
+                        <p><strong>Location:</strong> <?php echo htmlspecialchars($ticket['e_Location']); ?></p>
+                    </div>
+                <?php endwhile; ?>
+            <?php else: ?>
+                <div class="card">
+                    <p>You didn't book any event <a href="booking.php">Click here to see your gallery.</a></p>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
 
 </body>
 </html>

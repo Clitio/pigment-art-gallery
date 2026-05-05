@@ -83,50 +83,68 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <meta charset="UTF-8">
     <title>Update Profile - Pigment Art Gallery</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 30px; }
-        form { max-width: 420px; }
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: sans-serif;
+        }
+        .card {
+            width: 420px;
+            max-width: calc(100% - 40px);
+            padding: 30px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-sizing: border-box;
+        }
+        h1 { margin-top: 0; text-align: center; }
         label { font-weight: bold; }
         input { width: 100%; padding: 8px; margin: 6px 0 15px; box-sizing: border-box; }
-        button { padding: 10px 16px; cursor: pointer; }
+        button { width: 100%; padding: 10px 16px; cursor: pointer; }
         .message { color: green; font-weight: bold; }
         .error { color: red; font-weight: bold; }
-        .actions { margin-top: 20px; }
+        .actions { margin-top: 20px; text-align: center; }
     </style>
 </head>
 <body>
 
-    <h1>Update Profile</h1>
+    <div class="card">
+        <h1>Update Profile</h1>
 
-    <?php if ($message): ?>
-        <p class="message"><?php echo htmlspecialchars($message); ?></p>
-    <?php endif; ?>
+        <?php if ($message): ?>
+            <p class="message"><?php echo htmlspecialchars($message); ?></p>
+        <?php endif; ?>
 
-    <?php if ($error): ?>
-        <p class="error"><?php echo htmlspecialchars($error); ?></p>
-    <?php endif; ?>
+        <?php if ($error): ?>
+            <p class="error"><?php echo htmlspecialchars($error); ?></p>
+        <?php endif; ?>
 
-    <form action="user-update.php" method="POST">
-        <label>First Name:</label>
-        <input type="text" name="f_Name" value="<?php echo htmlspecialchars($user_data['f_Name']); ?>" required>
+        <form action="user-update.php" method="POST">
+            <label>First Name:</label>
+            <input type="text" name="f_Name" value="<?php echo htmlspecialchars($user_data['f_Name']); ?>" required>
 
-        <label>Last Name:</label>
-        <input type="text" name="l_Name" value="<?php echo htmlspecialchars($user_data['l_Name']); ?>" required>
+            <label>Last Name:</label>
+            <input type="text" name="l_Name" value="<?php echo htmlspecialchars($user_data['l_Name']); ?>" required>
 
-        <label>Date of Birth:</label>
-        <input type="date" name="dOb" value="<?php echo htmlspecialchars($user_data['dOb'] ?? ''); ?>">
+            <label>Date of Birth:</label>
+            <input type="date" name="dOb" value="<?php echo htmlspecialchars($user_data['dOb'] ?? ''); ?>">
 
-        <label>Email:</label>
-        <input type="email" name="email" value="<?php echo htmlspecialchars($user_data['email']); ?>" required>
+            <label>Email:</label>
+            <input type="email" name="email" value="<?php echo htmlspecialchars($user_data['email']); ?>" required>
 
-        <label>New Password:</label>
-        <input type="password" name="password" placeholder="Leave blank to keep current password">
+            <label>New Password:</label>
+            <input type="password" name="password" placeholder="Leave blank to keep current password">
 
-        <button type="submit">Save changes</button>
-    </form>
+            <button type="submit">Save changes</button>
+        </form>
 
-    <div class="actions">
-        <a href="user_dashboard.php">Back to dashboard</a> |
-        <a href="../../logout.php">Logout</a>
+        <div class="actions">
+            <a href="user_dashboard.php">Back to dashboard</a> |
+            <a href="../../logout.php">Logout</a>
+        </div>
     </div>
 
 </body>
