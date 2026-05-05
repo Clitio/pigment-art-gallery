@@ -1,13 +1,11 @@
 <?php
-session_start(); // Initializes session to check if user is logged in
-require_once 'dbconnect.php'; // Includes the database connection file[cite: 1]
+session_start(); 
+require_once 'dbconnect.php'; 
 
-// Check if a 'role' exists in the session (indicates an active login)[cite: 1]
 if (isset($_SESSION['role'])) {
     $role = $_SESSION['role'];
-    // Dynamically redirect based on role (e.g., pages/admin/admin_dashboard.php)[cite: 1]
     header("Location: pages/$role/{$role}_dashboard.php");
-    exit(); // Stop script execution after redirect[cite: 1]
+    exit(); 
 }
 ?>
 
@@ -32,7 +30,7 @@ if (isset($_SESSION['role'])) {
             width: 100%;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: white;
-            overflow: hidden; /* Prevents scrollbars over the video */
+            overflow: hidden; 
         }
 
         #bg-video {
@@ -44,7 +42,7 @@ if (isset($_SESSION['role'])) {
             width: auto;
             height: auto;
             z-index: -2;
-            object-fit: cover; /* Ensures video scales perfectly */
+            object-fit: cover; 
         }
 
         .video-overlay {
@@ -55,7 +53,6 @@ if (isset($_SESSION['role'])) {
             height: 100%;
             background: rgba(0, 0, 0, 0.55);
             z-index: -1;
-            
         }
 
         .content-wrapper {
@@ -67,6 +64,23 @@ if (isset($_SESSION['role'])) {
             text-align: center;
             z-index: 1;
         }
+
+        /* --- FADE EFFECTS CSS --- */
+        .fade-element {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 2.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .fade-element.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Staggered Delays */
+        .title { transition-delay: 0.4s; }
+        .subtitle { transition-delay: 1.2s; }
+        .card-container { transition-delay: 2.0s; }
 
         h1 {
             font-size: 5rem;
@@ -119,15 +133,40 @@ if (isset($_SESSION['role'])) {
     <div class="video-overlay"></div>
 
     <div class="content-wrapper">
-        <h1>PIGMENT</h1>
-        <h2>Where colours turn into dreams</h2>
+        <!-- Elements now have the fade-element class and their specific identifiers -->
+        <h1 class="fade-element title">PIGMENT</h1>
+        <h2 class="fade-element subtitle">Where colours turn into dreams</h2>
 
-        <div class="card-container">
+        <div class="card-container fade-element">
             <a href="register.php" class="card">Register</a>
             <a href="login.php" class="card">Login</a>
             <a href="catalog.php" class="card">Catalog</a>
         </div>
     </div>
 
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Options for the observer
+            const observerOptions = {
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        // Find all items with the fade-element class inside the content-wrapper
+                        const elements = entry.target.querySelectorAll('.fade-element');
+                        elements.forEach(el => el.classList.add('is-visible'));
+                    }
+                });
+            }, observerOptions);
+
+            // Observe the main content wrapper
+            const content = document.querySelector('.content-wrapper');
+            if (content) {
+                observer.observe(content);
+            }
+        });
+    </script>
 </body>
 </html>
