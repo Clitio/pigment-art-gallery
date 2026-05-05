@@ -5,7 +5,7 @@ if(!isset($_SESSION['role']) || $_SESSION['role'] !== 'organiser') {
     header("Location: ../../login.php");
     exit();
 }
-$organiser_ID = $_SESSION['user_id'];
+$organiser_ID = $_SESSION['organiser_ID'];
 $success = "";
 $errors  = [];
 $event_ID = $_GET['event_ID'] ?? null;

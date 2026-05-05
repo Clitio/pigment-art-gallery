@@ -5,7 +5,7 @@ require_once 'dbconnect.php';
         header("Location: ../../login.php");
         exit();
     }
-    $organiser_ID = $_SESSION['user_id'];
+    $organiser_ID = $_SESSION['organiser_ID'];
     $success = "";
     $errors  = [];
 
