@@ -115,7 +115,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
     <div class="card">
         <h1>Booking tickets</h1>
         <?php if (isset($message)) echo "<p><strong>$message</strong></p>"; ?>
-        <form action="booking.php" method="POST">
+        <form action="booking.php" method="POST" data-booking-form>
             <label>Choose the Event:</label>
             <select name="event_ID" required>
                 <?php
@@ -132,5 +132,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
             <a href="user_dashboard.php">Back to dashboard</a>
         </div>
     </div>
+    <script src="user.js"></script>
 </body>
 </html>

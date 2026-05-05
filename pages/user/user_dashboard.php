@@ -20,6 +20,7 @@ if ($user_query_user->num_rows === 0) {
 }
 
 $user_data = $user_query_user->fetch_assoc();
+$user_initials = strtoupper(substr($user_data['f_Name'], 0, 1) . substr($user_data['l_Name'] ?? '', 0, 1));
 
 $sql_bookings = "SELECT e.e_Title, e.e_Date, e.e_Location
                  FROM tickets t
@@ -37,12 +38,13 @@ $bookings = $stmt_bookings->get_result();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Panel - Pigment Art Gallery</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
     <style>
         body, html {
             margin: 0;
             padding: 0;
             min-height: 100%;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: white;
         }
 
@@ -68,34 +70,131 @@ $bookings = $stmt_bookings->get_result();
 
         body {
             display: flex;
-            flex-direction: column;
             align-items: center;
+            justify-content: center;
             min-height: 100vh;
             padding: 40px 20px;
             box-sizing: border-box;
         }
 
         .page {
-            width: 760px;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 25px;
+            width: 1050px;
             max-width: 100%;
         }
 
-        .welcome {
+        .sidebar,
+        .content-panel,
+        .card {
             padding: 30px;
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(25px);
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 20px;
-            text-align: center;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .sidebar {
+            min-height: 520px;
+            display: flex;
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .brand {
+            margin: 0 0 25px;
+            letter-spacing: 3px;
+            font-size: 1.4rem;
+            font-family: 'Playfair Display', Georgia, serif;
+        }
+
+        .avatar {
+            width: 105px;
+            height: 105px;
+            margin: 0 auto 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(255, 204, 0, 0.18);
+            border: 2px solid #ffcc00;
+            color: #ffcc00;
+            font-size: 2.3rem;
+            font-weight: bold;
+            box-shadow: 0 0 30px rgba(255, 204, 0, 0.25);
+        }
+
+        .profile-name {
+            margin: 0;
+            font-size: 1.5rem;
+            font-family: 'Playfair Display', Georgia, serif;
+        }
+
+        .profile-email {
+            margin: 8px 0 25px;
+            opacity: 0.82;
+            overflow-wrap: anywhere;
         }
 
         .nav-links {
             display: flex;
-            justify-content: center;
-            gap: 20px;
-            flex-wrap: wrap;
-            margin-top: 18px;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: auto;
+        }
+
+        .side-menu {
+            margin-top: 24px;
+            text-align: left;
+        }
+
+        .menu-toggle {
+            width: 100%;
+            padding: 12px 14px;
+            background: rgba(255, 255, 255, 0.08);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 700;
+            text-align: left;
+        }
+
+        .menu-toggle::after {
+            content: "+";
+            float: right;
+            color: #ffcc00;
+            font-size: 1.1rem;
+        }
+
+        .side-menu.is-open .menu-toggle::after {
+            content: "-";
+        }
+
+        .menu-options {
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: grid-template-rows 0.3s ease;
+        }
+
+        .side-menu.is-open .menu-options {
+            grid-template-rows: 1fr;
+        }
+
+        .menu-options-inner {
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-top: 0;
+            transition: padding-top 0.3s ease;
+        }
+
+        .side-menu.is-open .menu-options-inner {
+            padding-top: 12px;
         }
 
         a {
@@ -104,22 +203,151 @@ $bookings = $stmt_bookings->get_result();
             font-weight: bold;
         }
 
-        .card-container {
+        .nav-links a,
+        .menu-options a,
+        .empty-state a {
+            display: block;
+            padding: 12px 14px;
+            border: 1px solid rgba(255, 204, 0, 0.45);
+            border-radius: 10px;
+            background: rgba(255, 204, 0, 0.08);
+            transition: 0.3s ease;
+        }
+
+        .nav-links a:hover,
+        .menu-options a:hover,
+        .empty-state a:hover {
+            background: #ffcc00;
+            color: #222;
+        }
+
+        .content-panel {
+            min-height: 520px;
+        }
+
+        .panel-header {
             display: flex;
-            flex-direction: column;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .panel-header h1 {
+            margin: 0;
+            font-size: 2.2rem;
+            font-family: 'Playfair Display', Georgia, serif;
+        }
+
+        .panel-header p {
+            margin: 8px 0 0;
+            opacity: 0.82;
+        }
+
+        .booking-count {
+            min-width: 110px;
+            padding: 14px;
+            border-radius: 15px;
+            background: rgba(255, 204, 0, 0.16);
+            border: 1px solid rgba(255, 204, 0, 0.45);
+            text-align: center;
+        }
+
+        .booking-count strong {
+            display: block;
+            font-size: 2rem;
+            color: #ffcc00;
+        }
+
+        .booking-count span {
+            font-size: 0.85rem;
+            opacity: 0.85;
+        }
+
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
             gap: 15px;
         }
 
         .card {
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 15px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+            position: relative;
+            overflow: hidden;
+            padding: 0;
         }
 
-        h2 { margin-top: 35px; text-align: center; }
+        .card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(0, 242, 255, 0.16), rgba(255, 204, 0, 0.12));
+            pointer-events: none;
+        }
+
+        .event-date {
+            position: relative;
+            padding: 18px;
+            background: rgba(0, 0, 0, 0.28);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+        }
+
+        .event-date strong {
+            display: block;
+            font-size: 2.2rem;
+            line-height: 1;
+            color: #ffcc00;
+        }
+
+        .event-date span {
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.85rem;
+        }
+
+        .event-details {
+            position: relative;
+            padding: 20px;
+        }
+
+        .event-details h3 {
+            margin: 0 0 14px;
+            font-size: 1.25rem;
+            font-family: 'Playfair Display', Georgia, serif;
+        }
+
+        .event-details p {
+            margin: 8px 0 0;
+            opacity: 0.86;
+        }
+
+        .empty-state {
+            grid-column: 1 / -1;
+            padding: 35px;
+            text-align: center;
+        }
+
+        .empty-state p {
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 820px) {
+            body {
+                justify-content: flex-start;
+            }
+
+            .page {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar,
+            .content-panel {
+                min-height: auto;
+            }
+
+            .panel-header {
+                flex-direction: column;
+            }
+        }
     </style>
 </head>
 <body>
@@ -131,35 +359,66 @@ $bookings = $stmt_bookings->get_result();
 
     <div class="video-overlay"></div>
 
-    <div class="page">
-        <div class="welcome">
-            <h1>Hello, <?php echo htmlspecialchars($user_data['f_Name']); ?>!</h1>
-            <p>Email: <?php echo htmlspecialchars($user_data['email']); ?></p>
+    <main class="page">
+        <aside class="sidebar">
+            <h1 class="brand">PIGMENT</h1>
+            <div class="avatar"><?php echo htmlspecialchars($user_initials); ?></div>
+            <h2 class="profile-name"><?php echo htmlspecialchars($user_data['f_Name'] . ' ' . $user_data['l_Name']); ?></h2>
+            <p class="profile-email"><?php echo htmlspecialchars($user_data['email']); ?></p>
+            <div class="side-menu" data-expandable-menu>
+                <button type="button" class="menu-toggle" data-menu-toggle>Explore</button>
+                <div class="menu-options">
+                    <div class="menu-options-inner">
+                        <a href="../../logout.php" data-confirm-logout>Home</a>
+                        <a href="../../catalog.php">Collections</a>
+                    </div>
+                </div>
+            </div>
             <div class="nav-links">
-                <a href="../../logout.php">Logout</a>
                 <a href="booking.php">Book new events</a>
                 <a href="user-update.php">Update profile</a>
+                <a href="../../logout.php" data-confirm-logout>Exit to homepage</a>
             </div>
-        </div>
+        </aside>
 
-        <h2>My bookings</h2>
-
-        <div class="card-container">
-            <?php if ($bookings->num_rows > 0): ?>
-                <?php while ($ticket = $bookings->fetch_assoc()): ?>
-                    <div class="card">
-                        <h3><?php echo htmlspecialchars($ticket['e_Title']); ?></h3>
-                        <p><strong>Date:</strong> <?php echo date('d/m/Y', strtotime($ticket['e_Date'])); ?></p>
-                        <p><strong>Location:</strong> <?php echo htmlspecialchars($ticket['e_Location']); ?></p>
-                    </div>
-                <?php endwhile; ?>
-            <?php else: ?>
-                <div class="card">
-                    <p>You didn't book any event <a href="booking.php">Click here to see your gallery.</a></p>
+        <section class="content-panel">
+            <div class="panel-header">
+                <div>
+                    <h1>My bookings</h1>
+                    <p>Your upcoming gallery experiences in one place.</p>
                 </div>
-            <?php endif; ?>
-        </div>
-    </div>
+                <div class="booking-count">
+                    <strong><?php echo $bookings->num_rows; ?></strong>
+                    <span>booked events</span>
+                </div>
+            </div>
 
+            <div class="card-container">
+                <?php if ($bookings->num_rows > 0): ?>
+                    <?php while ($ticket = $bookings->fetch_assoc()): ?>
+                        <article class="card">
+                            <div class="event-date">
+                                <strong><?php echo date('d', strtotime($ticket['e_Date'])); ?></strong>
+                                <span><?php echo date('M Y', strtotime($ticket['e_Date'])); ?></span>
+                            </div>
+                            <div class="event-details">
+                                <h3><?php echo htmlspecialchars($ticket['e_Title']); ?></h3>
+                                <p><strong>Full date:</strong> <?php echo date('d/m/Y', strtotime($ticket['e_Date'])); ?></p>
+                                <p><strong>Location:</strong> <?php echo htmlspecialchars($ticket['e_Location']); ?></p>
+                            </div>
+                        </article>
+                    <?php endwhile; ?>
+                <?php else: ?>
+                    <div class="card empty-state">
+                        <h3>No bookings yet</h3>
+                        <p>Start exploring the gallery calendar and reserve your first event.</p>
+                        <a href="booking.php">Browse events</a>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </section>
+    </main>
+
+    <script src="user.js"></script>
 </body>
 </html>
