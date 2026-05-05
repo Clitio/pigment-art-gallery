@@ -90,16 +90,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     if (empty($errors)) {
+        // Convert empty strings to null so MySQL accepts them in nullable columns
+        $dateVal        = ($date === "")        ? null : $date;
+        $timeVal        = ($time === "")        ? null : $time;
+        $priceVal       = ($price === "")       ? null : $price;
+        $locationVal    = ($location === "" || $location === null) ? null : $location;
+        $descriptionVal = ($description === "") ? null : $description;
+        $imageVal       = ($imagePath === "")   ? null : $imagePath;
+
         $stmt = mysqli_prepare($conn,
             "INSERT INTO event (e_Title, e_Location, e_Date, e_Time, e_Price, e_Description, e_Image, organiser_ID)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
         );
         mysqli_stmt_bind_param($stmt, "ssssdssi",
-            $title, $location, $date, $time, $price, $description, $imagePath, $organiser_ID
+            $title, $locationVal, $dateVal, $timeVal, $priceVal, $descriptionVal, $imageVal, $organiser_ID
         );
 
         if (mysqli_stmt_execute($stmt)) {
             $success = "Event created successfully!";
+            // Clear form values after success
+            $title = $location = $date = $time = $price = $description = "";
         } else {
             $errors[] = "Database error: " . mysqli_error($conn);
         }
@@ -111,19 +121,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css">
+    <link rel="stylesheet" href="../../css/style.css">
     <meta charset="UTF-8">
     <title>Add Event</title>
 </head>
 <body>
 
-    <h2>Create New Event</h2>
-
     <nav>
-        <a href="organiser_dashboard.php">Dashboard</a> |
-        <a href="organiser_add.php">Add Event</a>   |
-        <a href="organiser_list.php">My Events</a>  
+        <a href="organiser_dashboard.php">Dashboard</a>
+        <a href="organiser_add.php">Add Event</a>
+        <a href="organiser_list.php">My Events</a>
         <a href="../../logout.php">Logout</a>
     </nav>
+
+    <header class="form-header" data-aos="fade-up">
+        <h1>Create New Event</h1>
+        <p>Add a new exhibition or experience to your gallery</p>
+    </header>
 
     <?php if ($success): ?>
         <p style="color: green;"><?= $success ?></p>
@@ -136,30 +153,39 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </ul>
     <?php endif; ?>
 
-    <form method="POST" enctype="multipart/form-data">
-        <label>Title</label><br>
-        <input type="text" name="e_Title" required><br><br>
+    <form method="POST" enctype="multipart/form-data" class="event-form" data-aos="fade-up" data-aos-delay="100">
+        <label>Title</label>
+        <input type="text" name="e_Title" required value="<?= htmlspecialchars($title ?? '') ?>" placeholder="e.g. Modernist Visions">
 
-        <label>Location</label><br>
-        <input type="text" name="e_Location"><br><br>
+        <label>Location</label>
+        <input type="text" name="e_Location" value="<?= htmlspecialchars($location ?? '') ?>" placeholder="e.g. Cork, Ireland">
 
-        <label>Date</label><br>
-        <input type="date" name="e_Date"><br><br>
+        <div class="form-row">
+            <div>
+                <label>Date</label>
+                <input type="date" name="e_Date" value="<?= htmlspecialchars($date ?? '') ?>">
+            </div>
+            <div>
+                <label>Time</label>
+                <input type="time" name="e_Time" value="<?= htmlspecialchars($time ?? '') ?>">
+            </div>
+        </div>
 
-        <label>Time</label><br>
-        <input type="time" name="e_Time"><br><br>
+        <label>Price (€)</label>
+        <input type="number" name="e_Price" step="0.01" min="0" value="<?= htmlspecialchars($price ?? '') ?>" placeholder="0.00">
 
-        <label>Price</label><br>
-        <input type="number" name="e_Price" step="0.01" min="0"><br><br>
+        <label>Description</label>
+        <textarea name="e_Description" rows="5" placeholder="Tell visitors about this event..."><?= htmlspecialchars($description ?? '') ?></textarea>
 
-        <label>Description</label><br>
-        <textarea name="e_Description" rows="4" cols="40"></textarea><br><br>
+        <label>Cover Image</label>
+        <input type="file" name="e_Image" accept="image/*">
 
-        <label>Image</label><br>
-        <input type="file" name="e_Image" accept="image/*"><br><br>
-
-        <button type="submit">Create Event</button>
+        <div class="form-actions">
+            <a href="organiser_list.php" class="secondary-link">&larr; Cancel</a>
+            <button type="submit">Create Event</button>
+        </div>
     </form>
-
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <script>AOS.init({ duration: 800, once: true, offset: 50 });</script>
 </body>
 </html>
