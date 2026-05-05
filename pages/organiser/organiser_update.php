@@ -134,80 +134,103 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 ?>
 
 
+<?php
+$stmt_org = mysqli_prepare($conn, 'SELECT o_Name, o_Company FROM organiser WHERE organiser_ID = ?');
+mysqli_stmt_bind_param($stmt_org, 'i', $organiser_ID);
+mysqli_stmt_execute($stmt_org);
+mysqli_stmt_bind_result($stmt_org, $o_Name, $o_Company);
+mysqli_stmt_fetch($stmt_org);
+mysqli_stmt_close($stmt_org);
+$initials = strtoupper(substr($o_Name ?? 'O', 0, 1));
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css">
-    <link rel="stylesheet" href="../../css/style.css">
     <meta charset="UTF-8">
-    <title>Update Event</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Event - Pigment</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../css/style.css">
 </head>
-<body>  
+<body>
 
-    <nav>
-        <a href="organiser_dashboard.php">Dashboard</a>
-        <a href="organiser_add.php">Add Event</a>
-        <a href="organiser_list.php">My Events</a>
-        <a href="../../logout.php">Logout</a>
-    </nav>
+    <video autoplay muted loop id="bg-video">
+        <source src="../../assets/aquarela_bg.mp4" type="video/mp4">
+    </video>
+    <div class="video-overlay"></div>
 
-    <header class="form-header" data-aos="fade-up">
-        <h1>Edit Event</h1>
-        <p><?= htmlspecialchars($event['e_Title']) ?></p>
-    </header>
+    <main class="page">
+        <aside class="sidebar">
+            <h1 class="brand">PIGMENT</h1>
+            <div class="avatar"><?= htmlspecialchars($initials) ?></div>
+            <h2 class="profile-name"><?= htmlspecialchars($o_Name) ?></h2>
+            <p class="profile-company"><?= htmlspecialchars($o_Company) ?></p>
 
-    <?php if ($success): ?>
-        <p style="color: green;"><?= $success ?></p>
-    <?php endif; ?>
-    <?php if (!empty($errors)): ?>
-        <ul style="color: red;">
-            <?php foreach ($errors as $e): ?>
-                <li><?= htmlspecialchars($e) ?></li>
-            <?php endforeach; ?>
-        </ul>
-    <?php endif; ?>
-
-    <form method="POST" enctype="multipart/form-data" class="event-form" data-aos="fade-up" data-aos-delay="100">
-        <input type="hidden" name="event_ID" value="<?= htmlspecialchars($event_ID) ?>">
-
-        <label>Title</label>
-        <input type="text" name="e_Title" required value="<?= isset($event['e_Title']) ? htmlspecialchars($event['e_Title']) : '' ?>">
-
-        <label>Location</label>
-        <input type="text" name="e_Location" value="<?= isset($event['e_Location']) ? htmlspecialchars($event['e_Location']) : '' ?>">
-
-        <div class="form-row">
-            <div>
-                <label>Date</label>
-                <input type="date" name="e_Date" value="<?= isset($event['e_Date']) ? htmlspecialchars($event['e_Date']) : '' ?>">
+            <div class="nav-links">
+                <a href="organiser_dashboard.php">Dashboard</a>
+                <a href="organiser_list.php" class="active">My events</a>
+                <a href="organiser_add.php">Add new event</a>
+                <a href="../../logout.php" data-confirm-logout>Logout</a>
             </div>
-            <div>
-                <label>Time</label>
-                <input type="time" name="e_Time" value="<?= isset($event['e_Time']) ? htmlspecialchars($event['e_Time']) : '' ?>">
-            </div>
-        </div>
+        </aside>
 
-        <label>Price (€)</label>
-        <input type="number" name="e_Price" step="0.01" min="0" value="<?= isset($event['e_Price']) ? htmlspecialchars($event['e_Price']) : '' ?>">
+        <section class="content-panel">
+            <header class="form-header">
+                <h1>Edit Event</h1>
+                <p><?= htmlspecialchars($event['e_Title']) ?></p>
+            </header>
 
-        <label>Description</label>
-        <textarea name="e_Description" rows="5"><?= isset($event['e_Description']) ? htmlspecialchars($event['e_Description']) : '' ?></textarea>
+            <?php if ($success): ?>
+                <p style="color: green;"><?= $success ?></p>
+            <?php endif; ?>
+            <?php if (!empty($errors)): ?>
+                <ul style="color: red;">
+                    <?php foreach ($errors as $e): ?>
+                        <li><?= htmlspecialchars($e) ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
 
-        <label>Cover Image</label>
-        <?php if (!empty($event['e_Image'])): ?>
-            <img src="../../<?= htmlspecialchars($event['e_Image']) ?>" alt="Current Image" class="current-image">
-        <?php endif; ?>
-        <input type="file" name="e_Image" accept="image/*">
+            <form method="POST" enctype="multipart/form-data" class="event-form">
+                <input type="hidden" name="event_ID" value="<?= htmlspecialchars($event_ID) ?>">
 
-        <div class="form-actions">
-            <a href="organiser_list.php" class="secondary-link">&larr; Back to events</a>
-            <button type="submit">Save Changes</button>
-        </div>
-    </form>
+                <label>Title</label>
+                <input type="text" name="e_Title" required value="<?= isset($event['e_Title']) ? htmlspecialchars($event['e_Title']) : '' ?>">
 
-    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
-    <script>AOS.init({ duration: 800, once: true, offset: 50 });</script>
+                <label>Location</label>
+                <input type="text" name="e_Location" value="<?= isset($event['e_Location']) ? htmlspecialchars($event['e_Location']) : '' ?>">
+
+                <div class="form-row">
+                    <div>
+                        <label>Date</label>
+                        <input type="date" name="e_Date" value="<?= isset($event['e_Date']) ? htmlspecialchars($event['e_Date']) : '' ?>">
+                    </div>
+                    <div>
+                        <label>Time</label>
+                        <input type="time" name="e_Time" value="<?= isset($event['e_Time']) ? htmlspecialchars($event['e_Time']) : '' ?>">
+                    </div>
+                </div>
+
+                <label>Price (€)</label>
+                <input type="number" name="e_Price" step="0.01" min="0" value="<?= isset($event['e_Price']) ? htmlspecialchars($event['e_Price']) : '' ?>">
+
+                <label>Description</label>
+                <textarea name="e_Description" rows="5"><?= isset($event['e_Description']) ? htmlspecialchars($event['e_Description']) : '' ?></textarea>
+
+                <label>Cover Image</label>
+                <?php if (!empty($event['e_Image'])): ?>
+                    <img src="../../<?= htmlspecialchars($event['e_Image']) ?>" alt="Current Image" class="current-image">
+                <?php endif; ?>
+                <input type="file" name="e_Image" accept="image/*">
+
+                <div class="form-actions">
+                    <a href="organiser_list.php" class="secondary-link">&larr; Back to events</a>
+                    <button type="submit">Save Changes</button>
+                </div>
+            </form>
+        </section>
+    </main>
+
+    <script src="organiser.js"></script>
 </body>
 </html>
