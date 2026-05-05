@@ -9,7 +9,7 @@ $dbname = "pigment-art-gallery";
 $conn = mysqli_connect($host, $user, $pass, $dbname);
 
 if (!$conn) {
-    die("Coundn't connect with the DATABASE: " . mysqli_connect_error());
+    die("Could not connect to the database: " . mysqli_connect_error());
 }
 
 mysqli_set_charset($conn, "utf8mb4");

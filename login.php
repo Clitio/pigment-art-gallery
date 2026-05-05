@@ -11,9 +11,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt = $conn->prepare("SELECT admin_ID as id, a_pwd as pwd, 'admin' as role FROM admin WHERE a_email = ?");
         $stmt->bind_param("s", $email);
     } else {
-        $stmt = $conn->prepare("SELECT user_id as id, pwd, 'user' as role FROM user WHERE email = ? 
+        $stmt = $conn->prepare("SELECT user_ID as id, pwd, 'user' as role FROM user WHERE email = ? 
                                 UNION 
-                                SELECT organiser_id as id, o_pwd as pwd, 'organiser' as role FROM organiser WHERE o_email = ?");
+                                SELECT organiser_ID as id, o_pwd as pwd, 'organiser' as role FROM organiser WHERE o_email = ?");
         $stmt->bind_param("ss", $email, $email);
     }
 
@@ -23,9 +23,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($row = $result->fetch_assoc()) {
         if (password_verify($password, $row['pwd'])) {
             session_regenerate_id(true); 
-            $_SESSION['user_id'] = $row['id'];
             $_SESSION['role'] = $row['role'];
             $_SESSION['email'] = $email;
+
+            if ($row['role'] === 'user') {
+                $_SESSION['user_ID'] = $row['id'];
+            } elseif ($row['role'] === 'organiser') {
+                $_SESSION['organiser_ID'] = $row['id'];
+            } elseif ($row['role'] === 'admin') {
+                $_SESSION['admin_ID'] = $row['id'];
+            }
 
             if ($remember) {
                 setcookie("remembered_email", $email, time() + (86400 * 30), "/");
