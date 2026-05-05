@@ -81,35 +81,100 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Update Profile - Pigment Art Gallery</title>
     <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            min-height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+        }
+
+        #bg-video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            min-width: 100%;
+            min-height: 100%;
+            z-index: -2;
+            object-fit: cover;
+        }
+
+        .video-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.55);
+            z-index: -1;
+        }
+
         body {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            margin: 0;
-            font-family: sans-serif;
+            padding: 40px 20px;
+            box-sizing: border-box;
         }
+
         .card {
             width: 420px;
             max-width: calc(100% - 40px);
-            padding: 30px;
-            border: 1px solid #ccc;
-            border-radius: 10px;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
             box-sizing: border-box;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
+
         h1 { margin-top: 0; text-align: center; }
         label { font-weight: bold; }
-        input { width: 100%; padding: 8px; margin: 6px 0 15px; box-sizing: border-box; }
-        button { width: 100%; padding: 10px 16px; cursor: pointer; }
-        .message { color: green; font-weight: bold; }
-        .error { color: red; font-weight: bold; }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0 15px;
+            border: none;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #ffcc00;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .message,
+        .error {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+        .message { background: rgba(60, 118, 61, 0.3); border: 1px solid #3c763d; }
+        .error { background: rgba(255, 85, 85, 0.3); border: 1px solid #ff5555; }
         .actions { margin-top: 20px; text-align: center; }
+        a { color: #ffcc00; text-decoration: none; }
     </style>
 </head>
 <body>
+
+    <video autoplay muted loop id="bg-video">
+        <source src="../../assets/aquarela_bg.mp4" type="video/mp4">
+        Your browser does not support HTML5 video.
+    </video>
+
+    <div class="video-overlay"></div>
 
     <div class="card">
         <h1>Update Profile</h1>

@@ -35,28 +35,61 @@ $bookings = $stmt_bookings->get_result();
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Panel - Pigment Art Gallery</title>
     <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            min-height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+        }
+
+        #bg-video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            min-width: 100%;
+            min-height: 100%;
+            z-index: -2;
+            object-fit: cover;
+        }
+
+        .video-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.55);
+            z-index: -1;
+        }
+
         body {
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            margin: 0;
             padding: 40px 20px;
-            font-family: sans-serif;
             box-sizing: border-box;
         }
+
         .page {
             width: 760px;
             max-width: 100%;
         }
+
         .welcome {
             padding: 30px;
-            border: 1px solid #ccc;
-            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
             text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
+
         .nav-links {
             display: flex;
             justify-content: center;
@@ -64,20 +97,39 @@ $bookings = $stmt_bookings->get_result();
             flex-wrap: wrap;
             margin-top: 18px;
         }
+
+        a {
+            color: #ffcc00;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
         .card-container {
             display: flex;
             flex-direction: column;
             gap: 15px;
         }
+
         .card {
             padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
         }
+
         h2 { margin-top: 35px; text-align: center; }
     </style>
 </head>
 <body>
+
+    <video autoplay muted loop id="bg-video">
+        <source src="../../assets/aquarela_bg.mp4" type="video/mp4">
+        Your browser does not support HTML5 video.
+    </video>
+
+    <div class="video-overlay"></div>
 
     <div class="page">
         <div class="welcome">
