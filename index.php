@@ -2,10 +2,10 @@
 session_start(); 
 require_once 'dbconnect.php'; 
 
+$dashboard_link = null;
 if (isset($_SESSION['role'])) {
     $role = $_SESSION['role'];
-    header("Location: pages/$role/{$role}_dashboard.php");
-    exit(); 
+    $dashboard_link = "pages/$role/{$role}_dashboard.php";
 }
 ?>
 
@@ -99,6 +99,8 @@ if (isset($_SESSION['role'])) {
         .card-container {
             display: flex;
             gap: 25px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
         .card {
@@ -138,8 +140,12 @@ if (isset($_SESSION['role'])) {
         <h2 class="fade-element subtitle">Where colours turn into dreams</h2>
 
         <div class="card-container fade-element">
-            <a href="register.php" class="card">Register</a>
-            <a href="login.php" class="card">Login</a>
+            <?php if ($dashboard_link): ?>
+                <a href="<?php echo htmlspecialchars($dashboard_link); ?>" class="card">Dashboard</a>
+            <?php else: ?>
+                <a href="register.php" class="card">Register</a>
+                <a href="login.php" class="card">Login</a>
+            <?php endif; ?>
             <a href="catalog.php" class="card">Catalog</a>
         </div>
     </div>

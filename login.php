@@ -7,15 +7,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = $_POST['password'];
     $remember = isset($_POST['remember_me']);
 
-    if (str_ends_with($email, '@pigment.com')) {
-        $stmt = $conn->prepare("SELECT admin_ID as id, a_pwd as pwd, 'admin' as role FROM admin WHERE a_email = ?");
-        $stmt->bind_param("s", $email);
-    } else {
-        $stmt = $conn->prepare("SELECT user_ID as id, pwd, 'user' as role FROM user WHERE email = ? 
-                                UNION 
-                                SELECT organiser_ID as id, o_pwd as pwd, 'organiser' as role FROM organiser WHERE o_email = ?");
-        $stmt->bind_param("ss", $email, $email);
-    }
+    $stmt = $conn->prepare("SELECT user_ID as id, pwd, 'user' as role FROM user WHERE email = ?
+                            UNION
+                            SELECT organiser_ID as id, o_pwd as pwd, 'organiser' as role FROM organiser WHERE o_email = ?
+                            UNION
+                            SELECT admin_ID as id, a_pwd as pwd, 'admin' as role FROM admin WHERE a_email = ?");
+    $stmt->bind_param("sss", $email, $email, $email);
 
     $stmt->execute();
     $result = $stmt->get_result();
@@ -40,7 +37,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 setcookie("remembered_email", "", time() - 3600, "/");
             }
 
-            header("Location: index.php");
+            header("Location: pages/{$row['role']}/{$row['role']}_dashboard.php");
             exit();
         } else {
             $error = "Password Incorrect.";
@@ -88,6 +85,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="container">
         <div class="form-card">
             <h1>Login</h1>
+            <?php if(isset($_GET['notice']) && $_GET['notice'] === 'booking_required'): ?>
+                <p style="color:#ffcc00;">Please login as an attendee to reserve your spot.</p>
+            <?php endif; ?>
             <?php if(isset($error)) echo "<p style='color:#ff5555;'>" . htmlspecialchars($error) . "</p>"; ?>
             <form action="login.php" method="POST">
                 <input type="email" name="email" placeholder="E-mail" value="<?php echo htmlspecialchars($_COOKIE['remembered_email'] ?? ''); ?>" required>

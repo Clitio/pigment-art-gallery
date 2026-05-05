@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once '../../dbconnect.php'; 
+require_once '../../dbconnect.php';
 
 if (!isset($_SESSION['user_ID']) || !isset($_SESSION['role']) || $_SESSION['role'] !== 'user') {
     header("Location: ../../login.php");
@@ -9,26 +9,20 @@ if (!isset($_SESSION['user_ID']) || !isset($_SESSION['role']) || $_SESSION['role
 
 $user_ID = $_SESSION['user_ID'];
 
-// Fetch user data
 $sql_user = "SELECT f_Name, l_Name, email FROM user WHERE user_ID = ?";
 $stmt_user = $conn->prepare($sql_user);
 $stmt_user->bind_param("i", $user_ID);
 $stmt_user->execute();
-$user_data = $stmt_user->get_result()->fetch_assoc();
+$user_result = $stmt_user->get_result();
 
-<<<<<<< HEAD
-if ($user_query_user->num_rows === 0) {
+if ($user_result->num_rows === 0) {
     die("Error: User not found on database.");
 }
 
-$user_data = $user_query_user->fetch_assoc();
+$user_data = $user_result->fetch_assoc();
 $user_initials = strtoupper(substr($user_data['f_Name'], 0, 1) . substr($user_data['l_Name'] ?? '', 0, 1));
 
-$sql_bookings = "SELECT e.e_Title, e.e_Date, e.e_Location
-=======
-// Fetch bookings with event_ID for the cancel feature
 $sql_bookings = "SELECT e.event_ID, e.e_Title, e.e_Date, e.e_Location
->>>>>>> e4e1a8c78887d95d5d45f968e22ced22ed7d52eb
                  FROM tickets t
                  JOIN event e ON t.event_ID = e.event_ID
                  WHERE t.user_ID = ?";
@@ -42,34 +36,39 @@ $bookings = $stmt_bookings->get_result();
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Panel - Pigment Art Gallery</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
     <style>
         body, html {
-<<<<<<< HEAD
             margin: 0;
             padding: 0;
             min-height: 100%;
             font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: white;
-=======
-            margin: 0; padding: 0; min-height: 100%;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: white;
->>>>>>> e4e1a8c78887d95d5d45f968e22ced22ed7d52eb
         }
+
         #bg-video {
-            position: fixed; top: 0; left: 0;
-            min-width: 100%; min-height: 100%;
-            z-index: -2; object-fit: cover;
+            position: fixed;
+            top: 0;
+            left: 0;
+            min-width: 100%;
+            min-height: 100%;
+            z-index: -2;
+            object-fit: cover;
         }
+
         .video-overlay {
-            position: fixed; top: 0; left: 0;
-            width: 100%; height: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             background: rgba(0, 0, 0, 0.6);
             z-index: -1;
         }
+
         body {
-<<<<<<< HEAD
             display: flex;
             align-items: center;
             justify-content: center;
@@ -94,26 +93,9 @@ $bookings = $stmt_bookings->get_result();
             backdrop-filter: blur(25px);
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 20px;
-=======
-            display: flex; flex-direction: column;
-            align-items: center; min-height: 100vh;
-            padding: 40px 20px; box-sizing: border-box;
-        }
-        .page { width: 760px; max-width: 100%; }
-        .welcome {
-            padding: 30px; background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 20px; text-align: center;
->>>>>>> e4e1a8c78887d95d5d45f968e22ced22ed7d52eb
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
-        .nav-links { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-top: 18px; }
-        
-        /* Links style */
-        a { color: #ffcc00; text-decoration: none; font-weight: bold; transition: 0.3s; }
-        a:hover { text-shadow: 0 0 10px #ffcc00; }
 
-<<<<<<< HEAD
         .sidebar {
             min-height: 520px;
             display: flex;
@@ -121,11 +103,17 @@ $bookings = $stmt_bookings->get_result();
             text-align: center;
         }
 
+        .brand,
+        .profile-name,
+        .panel-header h1,
+        .event-details h3 {
+            font-family: 'Playfair Display', Georgia, serif;
+        }
+
         .brand {
             margin: 0 0 25px;
             letter-spacing: 3px;
             font-size: 1.4rem;
-            font-family: 'Playfair Display', Georgia, serif;
         }
 
         .avatar {
@@ -147,20 +135,12 @@ $bookings = $stmt_bookings->get_result();
         .profile-name {
             margin: 0;
             font-size: 1.5rem;
-            font-family: 'Playfair Display', Georgia, serif;
         }
 
         .profile-email {
             margin: 8px 0 25px;
             opacity: 0.82;
             overflow-wrap: anywhere;
-        }
-
-        .nav-links {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-top: auto;
         }
 
         .side-menu {
@@ -215,10 +195,18 @@ $bookings = $stmt_bookings->get_result();
             padding-top: 12px;
         }
 
+        .nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: auto;
+        }
+
         a {
             color: #ffcc00;
             text-decoration: none;
             font-weight: bold;
+            transition: 0.3s ease;
         }
 
         .nav-links a,
@@ -229,7 +217,6 @@ $bookings = $stmt_bookings->get_result();
             border: 1px solid rgba(255, 204, 0, 0.45);
             border-radius: 10px;
             background: rgba(255, 204, 0, 0.08);
-            transition: 0.3s ease;
         }
 
         .nav-links a:hover,
@@ -243,6 +230,16 @@ $bookings = $stmt_bookings->get_result();
             min-height: 520px;
         }
 
+        .status-msg {
+            margin: 0 0 18px;
+            padding: 12px 14px;
+            border-radius: 10px;
+            background: rgba(0, 242, 255, 0.14);
+            border: 1px solid rgba(0, 242, 255, 0.45);
+            color: #00f2ff;
+            font-weight: bold;
+        }
+
         .panel-header {
             display: flex;
             justify-content: space-between;
@@ -254,7 +251,6 @@ $bookings = $stmt_bookings->get_result();
         .panel-header h1 {
             margin: 0;
             font-size: 2.2rem;
-            font-family: 'Playfair Display', Georgia, serif;
         }
 
         .panel-header p {
@@ -330,12 +326,30 @@ $bookings = $stmt_bookings->get_result();
         .event-details h3 {
             margin: 0 0 14px;
             font-size: 1.25rem;
-            font-family: 'Playfair Display', Georgia, serif;
         }
 
         .event-details p {
             margin: 8px 0 0;
             opacity: 0.86;
+        }
+
+        .btn-cancel {
+            display: inline-block;
+            margin-top: 16px;
+            padding: 9px 12px;
+            color: #ff7777;
+            border: 1px solid rgba(255, 119, 119, 0.65);
+            border-radius: 10px;
+            background: rgba(255, 68, 68, 0.08);
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .btn-cancel:hover {
+            background: #ff4444;
+            color: white;
+            text-shadow: none;
         }
 
         .empty-state {
@@ -366,102 +380,50 @@ $bookings = $stmt_bookings->get_result();
                 flex-direction: column;
             }
         }
-=======
-        .card-container { display: flex; flex-direction: column; gap: 15px; margin-top: 25px; }
-        .card {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 20px; background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 15px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
-        }
-        .btn-cancel {
-            color: #ff4444; border: 1px solid #ff4444;
-            padding: 5px 12px; border-radius: 5px; font-size: 0.75rem;
-            text-transform: uppercase;
-        }
-        .btn-cancel:hover { background: #ff4444; color: white; }
-        h2 { margin-top: 35px; text-align: center; letter-spacing: 1px; }
-        .status-msg { color: #00f2ff; margin-bottom: 15px; font-weight: bold; }
->>>>>>> e4e1a8c78887d95d5d45f968e22ced22ed7d52eb
     </style>
 </head>
 <body>
 
     <video autoplay muted loop id="bg-video">
         <source src="../../assets/aquarela_bg.mp4" type="video/mp4">
+        Your browser does not support HTML5 video.
     </video>
 
     <div class="video-overlay"></div>
 
-<<<<<<< HEAD
     <main class="page">
         <aside class="sidebar">
             <h1 class="brand">PIGMENT</h1>
             <div class="avatar"><?php echo htmlspecialchars($user_initials); ?></div>
             <h2 class="profile-name"><?php echo htmlspecialchars($user_data['f_Name'] . ' ' . $user_data['l_Name']); ?></h2>
             <p class="profile-email"><?php echo htmlspecialchars($user_data['email']); ?></p>
+
             <div class="side-menu" data-expandable-menu>
                 <button type="button" class="menu-toggle" data-menu-toggle>Explore</button>
                 <div class="menu-options">
                     <div class="menu-options-inner">
-                        <a href="../../logout.php" data-confirm-logout>Home</a>
+                        <a href="../../index.php">Home</a>
                         <a href="../../catalog.php">Collections</a>
                     </div>
                 </div>
             </div>
-            <div class="nav-links">
-                <a href="booking.php">Book new events</a>
-                <a href="user-update.php">Update profile</a>
-                <a href="../../logout.php" data-confirm-logout>Exit to homepage</a>
-=======
-    <div class="page">
-        <div class="welcome">
-            <?php if(isset($_GET['status']) && $_GET['status'] == 'cancelled'): ?>
-                <p class="status-msg">Reservation successfully removed.</p>
-            <?php endif; ?>
 
-            <h1>Hello, <?php echo htmlspecialchars($user_data['f_Name']); ?>!</h1>
-            <p>Email: <?php echo htmlspecialchars($user_data['email']); ?></p>
-            
             <div class="nav-links">
-                <!-- Restored Update Profile Link -->
-                <a href="user-update.php">Update Profile</a>
-                <a href="../../catalog.php">Book New Events</a>
-                <a href="../../logout.php" style="color: #ff4444;">Logout</a>
->>>>>>> e4e1a8c78887d95d5d45f968e22ced22ed7d52eb
+                <a href="../../catalog.php">Book new events</a>
+                <a href="user-update.php">Update profile</a>
+                <a href="../../logout.php" data-confirm-logout>Logout</a>
             </div>
         </aside>
 
-<<<<<<< HEAD
         <section class="content-panel">
+            <?php if (isset($_GET['status']) && $_GET['status'] === 'cancelled'): ?>
+                <p class="status-msg">Reservation successfully removed.</p>
+            <?php endif; ?>
+
             <div class="panel-header">
                 <div>
                     <h1>My bookings</h1>
                     <p>Your upcoming gallery experiences in one place.</p>
-=======
-        <h2>My Bookings</h2>
-
-        <div class="card-container">
-            <?php if ($bookings->num_rows > 0): ?>
-                <?php while ($ticket = $bookings->fetch_assoc()): ?>
-                    <div class="card">
-                        <div>
-                            <h3 style="margin:0;"><?php echo htmlspecialchars($ticket['e_Title']); ?></h3>
-                            <p style="margin: 5px 0 0 0; font-size: 0.9rem; opacity: 0.8;">
-                                📅 <?php echo date('d/m/Y', strtotime($ticket['e_Date'])); ?> | 📍 <?php echo htmlspecialchars($ticket['e_Location']); ?>
-                            </p>
-                        </div>
-                        <a href="../../cancel_reservation.php?id=<?php echo $ticket['event_ID']; ?>" 
-                           class="btn-cancel" 
-                           onclick="return confirm('Are you sure you want to cancel this booking?');">
-                           Cancel
-                        </a>
-                    </div>
-                <?php endwhile; ?>
-            <?php else: ?>
-                <div class="card" style="justify-content: center;">
-                    <p>No events booked yet. <a href="../../catalog.php">Browse the gallery.</a></p>
->>>>>>> e4e1a8c78887d95d5d45f968e22ced22ed7d52eb
                 </div>
                 <div class="booking-count">
                     <strong><?php echo $bookings->num_rows; ?></strong>
@@ -481,6 +443,11 @@ $bookings = $stmt_bookings->get_result();
                                 <h3><?php echo htmlspecialchars($ticket['e_Title']); ?></h3>
                                 <p><strong>Full date:</strong> <?php echo date('d/m/Y', strtotime($ticket['e_Date'])); ?></p>
                                 <p><strong>Location:</strong> <?php echo htmlspecialchars($ticket['e_Location']); ?></p>
+                                <a href="../../cancel_reservation.php?id=<?php echo $ticket['event_ID']; ?>"
+                                   class="btn-cancel"
+                                   onclick="return confirm('Are you sure you want to cancel this booking?');">
+                                    Cancel booking
+                                </a>
                             </div>
                         </article>
                     <?php endwhile; ?>
@@ -488,7 +455,7 @@ $bookings = $stmt_bookings->get_result();
                     <div class="card empty-state">
                         <h3>No bookings yet</h3>
                         <p>Start exploring the gallery calendar and reserve your first event.</p>
-                        <a href="booking.php">Browse events</a>
+                        <a href="../../catalog.php">Browse events</a>
                     </div>
                 <?php endif; ?>
             </div>

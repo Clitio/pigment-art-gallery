@@ -325,8 +325,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             </form>
 
             <div class="actions">
+                <a href="../../index.php">Home</a> |
                 <a href="user_dashboard.php">Back to dashboard</a> |
-                <a href="../../logout.php" data-confirm-logout>Exit to homepage</a>
+                <a href="../../logout.php" data-confirm-logout>Logout</a>
             </div>
         </section>
     </div>

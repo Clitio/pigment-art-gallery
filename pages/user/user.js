@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     logoutLinks.forEach(function (link) {
         link.addEventListener("click", function (event) {
-            if (!confirm("Do you want to exit to the homepage? This will log you out.")) {
+            if (!confirm("Are you sure you want to logout?")) {
                 event.preventDefault();
             }
         });

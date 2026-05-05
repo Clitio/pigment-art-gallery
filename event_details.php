@@ -72,6 +72,8 @@ $imagePath = !empty($event['e_Image']) ? $event['e_Image'] : "assets/default_art
             transition: 0.4s;
             text-transform: uppercase;
             letter-spacing: 1px;
+            display: inline-block;
+            text-decoration: none;
         }
 
         .btn-book:hover { transform: scale(1.05); background: white; box-shadow: 0 0 30px var(--accent); }

@@ -1,8 +1,10 @@
 <?php
 require_once 'dbconnect.php';
 session_start();
-if (!isset($_SESSION['user_ID'])){
-    die("You need to be logged in to book.");
+if (!isset($_SESSION['user_ID'])) {
+    $event_query = isset($_GET['event_ID']) && is_numeric($_GET['event_ID']) ? "&event_ID=" . urlencode($_GET['event_ID']) : "";
+    header("Location: ../../login.php?notice=booking_required" . $event_query);
+    exit();
 }
 
 $user_ID = $_SESSION['user_ID'];
