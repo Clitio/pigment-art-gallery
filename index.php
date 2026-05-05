@@ -17,9 +17,10 @@ if (isset($_SESSION['role'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pigment</title>
+
     <style>
         :root {
-            --accent-color: #ffcc00;
+            --accent-color: #00f2ff;
             --card-bg: rgba(255, 255, 255, 0.15);
             --card-hover: rgba(255, 255, 255, 0.25);
         }
@@ -52,8 +53,9 @@ if (isset($_SESSION['role'])) {
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.45); 
+            background: rgba(0, 0, 0, 0.55);
             z-index: -1;
+            
         }
 
         .content-wrapper {
@@ -70,7 +72,7 @@ if (isset($_SESSION['role'])) {
             font-size: 5rem;
             margin: 0;
             letter-spacing: 5px;
-            text-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            text-shadow: 0 0 20px rgba(0, 242, 255, 0.4);
         }
 
         h2 {
@@ -87,11 +89,11 @@ if (isset($_SESSION['role'])) {
 
         .card {
             padding: 35px 25px;
-            background: var(--card-bg);
-            backdrop-filter: blur(10px); /* Modern frosted-glass effect[cite: 9] */
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
             color: white;
             text-decoration: none;
-            border: 1px solid rgba(255,255,255,0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 15px;
             width: 140px;
             transition: all 0.4s ease;
