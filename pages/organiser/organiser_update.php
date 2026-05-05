@@ -137,19 +137,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css">
+    <link rel="stylesheet" href="../../css/style.css">
     <meta charset="UTF-8">
     <title>Update Event</title>
 </head>
 <body>  
 
-    <h2>Update Event</h2>
-
     <nav>
-        <a href="organiser_dashboard.php">Dashboard</a> |
-        <a href="organiser_add.php">Add Event</a>   |
-        <a href="organiser_list.php">My Events</a>  |
+        <a href="organiser_dashboard.php">Dashboard</a>
+        <a href="organiser_add.php">Add Event</a>
+        <a href="organiser_list.php">My Events</a>
         <a href="../../logout.php">Logout</a>
     </nav>
+
+    <header class="form-header" data-aos="fade-up">
+        <h1>Edit Event</h1>
+        <p><?= htmlspecialchars($event['e_Title']) ?></p>
+    </header>
 
     <?php if ($success): ?>
         <p style="color: green;"><?= $success ?></p>
@@ -161,34 +168,46 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <?php endforeach; ?>
         </ul>
     <?php endif; ?>
-    <form method="POST" enctype="multipart/form-data">
+
+    <form method="POST" enctype="multipart/form-data" class="event-form" data-aos="fade-up" data-aos-delay="100">
         <input type="hidden" name="event_ID" value="<?= htmlspecialchars($event_ID) ?>">
 
-        <label>Title</label><br>
-        <input type="text" name="e_Title" required value="<?= isset($event['e_Title']) ? htmlspecialchars($event['e_Title']) : '' ?>"><br><br>
+        <label>Title</label>
+        <input type="text" name="e_Title" required value="<?= isset($event['e_Title']) ? htmlspecialchars($event['e_Title']) : '' ?>">
 
-        <label>Location</label><br>
-        <input type="text" name="e_Location" value="<?= isset($event['e_Location']) ? htmlspecialchars($event['e_Location']) : '' ?>"><br><br>
+        <label>Location</label>
+        <input type="text" name="e_Location" value="<?= isset($event['e_Location']) ? htmlspecialchars($event['e_Location']) : '' ?>">
 
-        <label>Date</label><br>
-        <input type="date" name="e_Date" value="<?= isset($event['e_Date']) ? htmlspecialchars($event['e_Date']) : '' ?>"><br><br>
-        
-        <label>Time</label><br>
-        <input type="time" name="e_Time" value="<?= isset($event['e_Time']) ? htmlspecialchars($event['e_Time']) : '' ?>"><br><br>
+        <div class="form-row">
+            <div>
+                <label>Date</label>
+                <input type="date" name="e_Date" value="<?= isset($event['e_Date']) ? htmlspecialchars($event['e_Date']) : '' ?>">
+            </div>
+            <div>
+                <label>Time</label>
+                <input type="time" name="e_Time" value="<?= isset($event['e_Time']) ? htmlspecialchars($event['e_Time']) : '' ?>">
+            </div>
+        </div>
 
-        <label>Price</label><br>
-        <input type="number" name="e_Price" step="0.01" min="0" value="<?= isset($event['e_Price']) ? htmlspecialchars($event['e_Price']) : '' ?>"><br><br>
+        <label>Price (€)</label>
+        <input type="number" name="e_Price" step="0.01" min="0" value="<?= isset($event['e_Price']) ? htmlspecialchars($event['e_Price']) : '' ?>">
 
-        <label>Description</label><br>
-        <textarea name="e_Description" rows="4" cols="40"><?= isset($event['e_Description']) ? htmlspecialchars($event['e_Description']) : '' ?></textarea><br><br>
+        <label>Description</label>
+        <textarea name="e_Description" rows="5"><?= isset($event['e_Description']) ? htmlspecialchars($event['e_Description']) : '' ?></textarea>
 
-        <label>Image</label><br>
+        <label>Cover Image</label>
         <?php if (!empty($event['e_Image'])): ?>
-            <img src="../../<?= htmlspecialchars($event['e_Image']) ?>" alt="Current Image" style="max-width:150px;"><br>
+            <img src="../../<?= htmlspecialchars($event['e_Image']) ?>" alt="Current Image" class="current-image">
         <?php endif; ?>
-        <input type="file" name="e_Image" accept="image/*"><br><br>
+        <input type="file" name="e_Image" accept="image/*">
 
-        <button type="submit">Update Event</button>
+        <div class="form-actions">
+            <a href="organiser_list.php" class="secondary-link">&larr; Back to events</a>
+            <button type="submit">Save Changes</button>
+        </div>
     </form>
+
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <script>AOS.init({ duration: 800, once: true, offset: 50 });</script>
 </body>
 </html>
